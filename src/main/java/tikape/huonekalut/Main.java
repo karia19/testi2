@@ -13,6 +13,16 @@ import spark.template.thymeleaf.ThymeleafTemplateEngine;
 
 public class Main {
 
+
+    public static Connection getConnection() throws Exception {
+        String dbUrl = System.getenv("JDBC_DATABASE_URL");
+        if (dbUrl != null && dbUrl.length() > 0) {
+            return DriverManager.getConnection(dbUrl);
+        }
+
+        return DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
+    }
+
     public static void main(String[] args) throws Exception {
         System.out.println("Hello world!");
         // asetetaan portti jos heroku antaa PORT-ympäristömuuttujan
@@ -20,13 +30,16 @@ public class Main {
             Spark.port(Integer.valueOf(System.getenv("PORT")));
         }
 
+
+
         Spark.get("*", (req, res) -> {
  
             List<String> huonekalut = new ArrayList<>();
 
             // avaa yhteys tietokantaan
-            Connection conn
-                    = DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
+            //Connection conn
+            //        = DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
+            Connection conn = getConnection();
             // tee kysely
             PreparedStatement stmt
                     = conn.prepareStatement("SELECT nimi FROM Huonekalu");
@@ -53,9 +66,9 @@ public class Main {
                     + req.queryParams("huonekalu"));
             
             // avaa yhteys tietokantaan
-            Connection conn
-                    = DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
-            
+            //Connection conn
+            //        = DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
+            Connection conn = getConnection();
             // tee kysely
             PreparedStatement stmt
                     = conn.prepareStatement("INSERT INTO Huonekalu (nimi) VALUES (?)");
